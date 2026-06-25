@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioDiet Dashboard v4.5 - Pianificazione Avanzata</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --blue: #3b82f6;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 80px;
+        }
+
+        header {
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 24px 20px;
+            box-sizing: border-box;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        header p { margin: 6px 0 0 0; opacity: 0.7; font-size: 0.85rem; }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 { margin-top: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-dark); border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: #475569; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; font-size: 0.95rem; background-color: #f8fafc; transition: border 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; background-color: #fff; }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn-danger { background-color: #fef2f2; color: var(--danger); border: 1px solid #fee2e2; }
+        .btn-danger:hover { background-color: #fee2e2; }
+        .btn-outline { background-color: transparent; color: var(--blue); border: 1px solid var(--blue); }
+        .btn-outline:hover { background-color: #eff6ff; }
+
+        .nav-date-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 10px;
+            gap: 6px;
+        }
+        .nav-date-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .nav-date-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .nav-date-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .meal-section { background-color: #fff; border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 16px; margin-bottom: 12px; border-radius: 8px; }
+        .meal-section h3 { margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 700; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
+        .meal-item { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; color: #334155; }
+        .meal-item:last-child { border-bottom: none; }
+        .qty { font-weight: 700; color: var(--primary-dark); }
+
+        .alert-box { background-color: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid var(--accent); padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+        .alert-box h4 { margin: 0 0 4px 0; color: #b45309; font-size: 0.95rem; }
+        .alert-box p { margin: 0; font-size: 0.85rem; color: #78350f; }
+
+        .archive-status-badge {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        .status-unsaved { background-color: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+        .status-saved { background-color: #f0fdf4; color: #166534; border-color: #dcfce7; }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 600px;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid var(--border);
+            padding: 8px 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+            z-index: 1000;
+        }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; transition: color 0.2s; }
+        .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform 0.2s; }
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn.active svg { transform: translateY(-2px); }
+
+        details.log-disclosure { border-bottom: 1px solid var(--border); padding: 12px 0; }
+        details.log-disclosure:last-of-type { border-bottom: none; }
+        summary.log-summary { list-style: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.9rem; user-select: none; }
+        summary.log-summary::-webkit-details-marker { display: none; }
+        .log-details-content { background-color: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 0.85rem; color: #475569; line-height: 1.4; }
+        .log-details-content div { margin-bottom: 4px; }
+        
+        .hidden { display: none !important; }
+        
+        .grid-stats-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin-bottom: 16px; }
+        .stat-card { background-color: #f8fafc; padding: 12px 6px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .stat-card div:first-child { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-card div:last-child { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
+
+        .realtime-badge { background-color: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 12px; }
+        .btn-delete-log { background: none; border: none; color: var(--danger); font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+        .btn-delete-log:hover { background-color: #fef2f2; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🥗 BioDiet Dashboard</h1>
+        <p>Alimentazione Predittiva & Dinamica Real-Time</p>
+    </header>
+
+    <div class="container">
+        <div id="weightAlert" class="alert-box hidden">
+            <h4>⚖️ Aggiornamento Peso Consigliato</h4>
+            <p>Sono passati 7 giorni dall'ultimo inserimento. Aggiorna il peso per ricalibrare i macronutrienti.</p>
+        </div>
+
+        <div id="setupView" class="card hidden">
+            <h2 id="setupTitle">Configurazione Profilo</h2>
+            <div class="form-group">
+                <label>Nome Profilo:</label>
+                <input type="text" id="setupName" placeholder="Es. Mario">
+            </div>
+            <div class="form-group">
+                <label>Sesso:</label>
+                <select id="setupGender">
+                    <option value="M" selected>Maschio (M)</option>
+                    <option value="F">Femmina (F)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Età:</label>
+                <input type="number" id="setupAge" value="40">
+            </div>
+            <div class="form-group">
+                <label>Altezza (cm):</label>
+                <input type="number" id="setupHeight" value="175">
+            </div>
+            <div class="form-group">
+                <label>Peso Attuale (kg):</label>
+                <input type="number" id="setupWeight" value="85" oninput="aggiornaTarget(this.value)">
+            </div>
+            <div class="form-group">
+                <label>Target Peso Obiettivo:</label>
+                <select id="setupTarget"></select>
+            </div>
+            <div class="form-group">
+                <label>Livello di Attività Fisica:</label>
+                <select id="setupActivity">
+                    <option value="sedentario">Sedentario (Ufficio, poco movimento)</option>
+                    <option value="moderato" selected>Moderato (Camminate, 1-2 allenamenti)</option>
+                    <option value="attivo">Molto Attivo (Lavoro pesante o sport quotidiano)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-danger" style="flex: 1; padding: 14px;" onclick="annullaSetup()">Annulla ❌</button>
+                <button class="btn" style="flex: 2; padding: 14px;" onclick="salvaSetup()">Salva e Genera Dieta</button>
+            </div>
+        </div>
+
+        <div id="todayView" class="hidden">
+            <div class="card" style="padding: 12px 16px; margin-bottom: 12px; background-color: #f1f5f9; border: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <select id="selectProfilo" onchange="cambiaProfilo(this.value)" style="padding: 6px 12px; font-weight: 600; border-radius: 6px; border: 1px solid var(--border); background: white; font-size: 0.85rem;"></select>
+                    <button onclick="mostraNuovoSetup()" style="background: none; border: none; color: var(--blue); cursor: pointer; font-size: 0.85rem; font-weight: 600;">+ Nuovo Profilo</button>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <input type="text" id="inputCercaDataDashboard" placeholder="🔍 Salta alla data (es: 25/06/2026)..." oninput="saltaADataDashboard(this.value)" style="background-color: #fff; padding: 8px 12px; font-size: 0.85rem;">
+                </div>
+            </div>
+
+            <div class="nav-date-container" style="margin-bottom: 16px; margin-top: 0;">
+                <button id="btnMainPrev" class="nav-date-btn" onclick="navigaGiornoDashboard(1)">&larr; Prec</button>
+                <button id="btnMainToday" class="nav-date-btn" onclick="ritornaAOggiDashboard()" style="background-color: var(--blue); color: white; border: none;">Oggi 🏠</button>
+                <span id="lblMainDateStatus" class="nav-date-label">Oggi</span>
+                <button id="btnMainNext" class="nav-date-btn" onclick="navigaGiornoDashboard(-1)">Succ &rarr;</button>
+            </div>
+
+            <div class="card">
+                <h2 id="titleDietCard">Piano Alimentare Odierno</h2>
+                <div id="txtWeightStatus" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-align: center; background: #f8fafc; padding: 8px; border-radius: 8px;"></div>
+                
+                <div style="text-align: center;">
+                    <div id="badgeAI" class="realtime-badge">🤖 AI Real-Time: Bilanciato</div>
+                </div>
+
+                <div id="blockNormalDiet">
+                    <div class="meal-section">
+                        <h3>Colazione <span id="btnRegenBreakfast" style="font-size:0.8rem; color:var(--blue); cursor:pointer; font-weight:600;" onclick="rigeneraPasto('breakfast')">Rigenera 🔄</span></h3>
+                        <div id="boxBreakfast"></div>
+                    </div>
+
+                    <div class="meal-section">
+                        <h3>Pranzo <span id="btnRegenLunch" style="font-size:0.8rem; color:var(--blue); cursor:pointer; font-weight:600;" onclick="rigeneraPasto('lunch')">Rigenera 🔄</span></h3>
+                        <div id="boxLunch"></div>
+                    </div>
+
+                    <div class="meal-section">
+                        <h3>Cena <span id="btnRegenDinner" style="font-size:0.8rem; color:var(--blue); cursor:pointer; font-weight:600;" onclick="rigeneraPasto('dinner')">Rigenera 🔄</span></h3>
+                        <div id="boxDinner"></div>
+                    </div>
+
+                    <div class="card" style="box-shadow: none; border: 1px solid var(--border); margin-top: 16px; background: #f8fafc; padding: 16px;">
+                        <h3 style="margin: 0 0 6px 0; font-size: 0.9rem; font-weight:700; color: var(--text-dark);">Idratazione Consigliata</h3>
+                        <div id="lblWaterTarget" style="font-size: 1.15rem; font-weight: bold; color: var(--blue);"></div>
+                        <div id="lblWaterGlasses" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;"></div>
+                    </div>
+
+                    <button id="btnArchiviaNormale" class="btn" style="margin-top:16px;" onclick="archiviaGiornata(false)">Archivia e Salva Giornata</button>
+                </div>
+
+                <div id="blockSgarro" class="hidden" style="text-align: center; padding: 16px 0;">
+                    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+                    <h3 style="margin: 0 0 8px 0;">Giorno di Sgarro Attivo</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4;">I vincoli dei macro sono sospesi. Goditi il pasto libero!</p>
+                    <button id="btnArchiviaSgarro" class="btn btn-accent" onclick="archiviaGiornata(true)">Archivia Giorno di Sgarro</button>
+                </div>
+
+                <div id="archiveStatusBadge" class="archive-status-badge status-unsaved">⚠️ Giornata non salvata nello storico</div>
+
+                <button id="btnToggleSgarro" class="btn btn-accent" style="margin-top: 12px; background-color:#64748b;" onclick="toggleSgarroStato()">Imposta Oggi come Sgarro</button>
+            </div>
+
+            <div id="blockUpdateWeight" class="card">
+                <h2>Aggiorna Peso Corporeo</h2>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" step="0.1" id="inputPesoOggi" placeholder="Es. 84.3" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                    <button class="btn btn-accent" style="width: auto; white-space: nowrap; padding: 0 20px;" onclick="registraPesoOggi()">Salva</button>
+                </div>
+            </div>
+            
+            <div id="blockModificaTargetRapido" class="card hidden" style="border: 1px solid var(--primary);">
+                <h2 style="color: var(--primary-dark);">⚙️ Gestione Obiettivo Peso</h2>
+                <p style="font-size: 0.85rem; margin-top: 0; color: var(--text-muted);">Attualmente sei in modalità mantenimento o hai completato l'obiettivo. Vuoi impostare un nuovo target partendo dal peso attuale?</p>
+                <div style="display: flex; gap: 10px;">
+                    <select id="selectNuovoTargetRapido" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></select>
+                    <button class="btn" style="width: auto;" onclick="salvaNuovoTargetRapido()">Imposta</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendarView" class="hidden">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+                    <h2 style="margin: 0; border: none; padding: 0;">Analisi & Trend Storico</h2>
+                    <button class="nav-date-btn" style="font-size: 0.8rem; color: var(--blue);" onclick="modificaPesoInizialeLibero()">Modifica Iniziale ⚙️</button>
+                </div>
+                <div class="grid-stats-5">
+                    <div class="stat-card">
+                        <div>Iniziale</div>
+                        <div id="stIniziale">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Target</div>
+                        <div id="stTarget" style="color: var(--blue);">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Attuale</div>
+                        <div id="stAttuale">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Stato Obiett.</div>
+                        <div id="stStatoObiettivo">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Trend Inser.</div>
+                        <div id="stTrend">-</div>
+                    </div>
+                </div>
+                <p id="txtTrendFeedback" style="font-size: 0.85rem; color: #334155; background: #f1f5f9; padding: 12px; border-radius: 8px; margin: 0; line-height: 1.4;"></p>
+            </div>
+
+            <div class="card">
+                <h2>Giornate Archiviate / Pianificate</h2>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <input type="text" id="inputCercaData" placeholder="🔍 Cerca per data (es: 23/06/2026)..." oninput="filtraStoricoPerData(this.value)" style="background-color: #fff; padding: 10px;">
+                </div>
+                
+                <div id="listCalendarLog" style="display: flex; flex-direction: column;"></div>
+
+                <div id="paginationContainer" class="nav-date-container hidden">
+                    <button id="btnPrevPage" class="nav-date-btn" onclick="cambiaPaginaStorico(-1)">&larr; Prec</button>
+                    <span id="lblPageStatus" class="nav-date-label">Pagina 1 di 1</span>
+                    <button id="btnNextPage" class="nav-date-btn" onclick="cambiaPaginaStorico(1)">Succ &rarr;</button>
+                </div>
+            </div>
+
+            <div class="card" style="border: 1px solid #e2e8f0; background-color: #f8fafc;">
+                <h2>Backup & Sicurezza Dati</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; margin-top: 0;">Salva un file di sicurezza sul tuo dispositivo per evitare perdite di cronologia.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                    <button class="btn btn-outline" style="flex: 1; font-size: 0.85rem; padding: 10px;" onclick="esportaBackup()">📥 Esporta JSON</button>
+                    <button class="btn btn-outline" style="flex: 1; font-size: 0.85rem; padding: 10px;" onclick="document.getElementById('fileImport').click()">📤 Importa JSON</button>
+                    <input type="file" id="fileImport" accept=".json" style="display: none;" onchange="importaBackup(event)">
+                </div>
+                <h2 style="border-top: 1px solid var(--border); padding-top: 12px; color: var(--danger); font-size: 1rem;">Eliminazione</h2>
+                <button class="btn btn-danger" style="padding: 10px;" onclick="resetApp()">Elimina Profilo Corrente</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appNav" class="nav-bar hidden">
+        <button id="tabToday" class="nav-btn active" onclick="cambiaTab('today')">
+            <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/><path d="M16 2v4M8 2v4M4 10h16"/></svg>
+            <span>Oggi</span>
+        </button>
+        <button id="tabCalendar" class="nav-btn" onclick="cambiaTab('calendar')">
+            <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span>Storico & Stats</span>
+        </button>
+    </div>
+
+    <script>
+        const macroDatabase = {
+            breakfast: [
+                { elenco: ["Tè o Caffè non zuccherato", "Fette biscottate integrali (4 fette)", "Marmellata senza zuccheri (2 cucchiaini)"], impatto: "alto" },
+                { elenco: ["Yogurt greco 0% o Bianco magro (150g)", "Fiocchi d'avena o muesli integrale (40g)", "Un frutto fresco di stagione"], impatto: "medio" },
+                { elenco: ["Tè o tisana a scelta", "Biscotti secchi integrali o d'avena (5-6 pezzi)"], impatto: "alto" },
+                { elenco: ["Spremuta d'arancia fresca", "Pane integrale tostato (2 fette)", "Ricotta vaccina magra (60g)"], impatto: "medio" },
+                { elenco: ["Caffè macchiato", "Omelette di soli albumi (3) con un filo di miele"], impatto: "basso" }
+            ],
+            carboPranzo: [
+                { cat: "Pasta o Riso integrale (o farro/orzo)", qta: 80, tipo: "alto" },
+                { cat: "Riso Basmati", qta: 75, tipo: "alto" },
+                { cat: "Patate lesse o al vapore", qta: 250, tipo: "medio" },
+                { cat: "Legumi secchi (Lenticchie/Ceci/Fagioli)", qta: 90, tipo: "medio" },
+                { cat: "Passato o Vellutata di verdure", qta: 0, tipo: "basso" }
+            ],
+            protPranzo: [
+                { cat: "Carne bianca magra (Pollo o tacchino)", qta: 140 },
+                { cat: "Pesce al naturale (Tonno o sgombro)", qta: 110 },
+                { cat: "Affettato magro (Bresaola o fesa)", qta: 80 },
+                { cat: "Formaggio fresco light (Fiocchi o ricotta)", qta: 180 }
+            ],
+            protCena: [
+                { cat: "Pesce bianco magro (Merluzzo, orata, branzino)", qta: 200 },
+                { cat: "Pesce azzurro o semigrasso (Salmone)", qta: 130 },
+                { cat: "Uova intere (Sode o in frittata)", qta: 2, uM: "pz" },
+                { cat: "Tagliata di bovino magro", qta: 140 }
+            ],
+            verdure: ["Verdure crude a foglia (Insalata)", "Verdure grigliate (Zucchine/Melanzane)", "Verdure al vapore (Broccoli/Spinaci)", "Verdure capsiche (Finocchi/Cetrioli)"]
+        };
+
+        let globalStore = { currentProfileName: "", profiles: {} };
+        let appData = null;
+        let pesoModificatoOggi = false; 
+        
+        let indiceStoricoDashboard = 0; 
+        let paginaCorrenteStorico = 0;
+        const elementiPerPagina = 7;
+        let queryFiltroStorico = "";
+
+        function init() {
+            aggiornaTarget(85);
+            const salvataggio = localStorage.getItem('bioDietDashboardDB_v3');
+            if (salvataggio) {
+                try {
+                    globalStore = JSON.parse(salvataggio);
+                    if(!globalStore.profiles) globalStore.profiles = {};
+                    const keys = Object.keys(globalStore.profiles);
+                    if(keys.length > 0) {
+                        if(!globalStore.currentProfileName || !globalStore.profiles[globalStore.currentProfileName]) {
+                            globalStore.currentProfileName = keys[0];
+                        }
+                        caricaProfiloAttivo();
+                        return;
+                    }
+                } catch(e) {
+                    globalStore = { currentProfileName: "", profiles: {} };
+                }
+            }
+            mostraSetup();
+        }
+
+        function caricaProfiloAttivo() {
+            appData = globalStore.profiles[globalStore.currentProfileName];
+            if(!appData) { mostraSetup(); return; }
+            if(!appData.history) appData.history = [];
+            if(appData.user.isMantenimento === undefined) appData.user.isMantenimento = false;
+            if(appData.user.gender === undefined) appData.user.gender = "M";
+            if(!appData.temporaryFutureDays) appData.temporaryFutureDays = {};
+
+            paginaCorrenteStorico = 0;
+            indiceStoricoDashboard = 0; 
+            queryFiltroStorico = "";
+            
+            popolaSelectProfili();
+            controllaAlertPeso();
+            
+            if(!appData.currentDay || !appData.currentDay.lunch) {
+                compilaMenuDelGiorno();
+            } else {
+                ricalcolaGrammatureInTempoReale();
+            }
+            
+            aggiornaCalendarioEStats();
+            mostraSchermataPrincipale();
+            gestisciVisibilitaPannelloTargetRapido();
+        }
+
+        function popolaSelectProfili() {
+            const select = document.getElementById('selectProfilo');
+            if(!select) return; 
+            select.innerHTML = '';
+            Object.keys(globalStore.profiles).forEach(pName => {
+                let opt = document.createElement('option');
+                opt.value = pName; opt.innerText = pName;
+                if(pName === globalStore.currentProfileName) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function cambiaProfilo(pName) {
+            if(globalStore.profiles[pName]) {
+                globalStore.currentProfileName = pName;
+                pesoModificatoOggi = false;
+                salvaSuStorage();
+                caricaProfiloAttivo();
+            }
+        }
+
+        function mostraNuovoSetup() {
+            document.getElementById('setupView').classList.remove('hidden');
+            document.getElementById('todayView').classList.add('hidden');
+            document.getElementById('calendarView').classList.add('hidden');
+            document.getElementById('appNav').classList.add('hidden');
+            document.getElementById('setupTitle').innerText = "Configurazione Nuovo Profilo";
+            document.getElementById('setupName').value = "";
+            document.getElementById('setupName').disabled = false;
+            document.getElementById('setupGender').value = "M";
+            aggiornaTarget(85);
+        }
+        function annullaSetup() {
+            if (globalStore.currentProfileName && globalStore.profiles[globalStore.currentProfileName]) {
+                caricaProfiloAttivo();
+            } else {
+                alert("Nessun profilo attivo impostato. È necessario configurare almeno un profilo.");
+            }
+        }
+        function aggiornaTarget(pesoAttuale) {
+            const select = document.getElementById('setupTarget');
+            if(!select) return;
+            select.innerHTML = '';
+            let p = parseFloat(pesoAttuale) || 85;
+            for(let i = 2; i <= 20; i += 2) {
+                let t = p - i; if (t < 40) break;
+                let opt = document.createElement('option'); opt.value = t;
+                opt.innerText = `${t} kg (Riduci di ${i} kg)`;
+                if(i === 10) opt.selected = true;
+                select.appendChild(opt);
+            }
+        }
+
+        function popolaSelettoreTargetRapido(pesoAttuale) {
+            const select = document.getElementById('selectNuovoTargetRapido');
+            if(!select) return;
+            select.innerHTML = '';
+            let p = parseFloat(pesoAttuale) || 85;
+            for(let i = 2; i <= 16; i += 2) {
+                let t = Math.round((p - i) * 10) / 10; if (t < 40) break;
+                let opt = document.createElement('option'); opt.value = t;
+                opt.innerText = `Nuovo Obiettivo: ${t} kg (-${i} kg)`;
+                select.appendChild(opt);
+            }
+        }
+
+        function gestisciVisibilitaPannelloTargetRapido() {
+            const block = document.getElementById('blockModificaTargetRapido');
+            if(!block) return;
+            if(appData && appData.user && (appData.user.isMantenimento || appData.currentDay.weight <= appData.user.target) && indiceStoricoDashboard === 0) {
+                block.classList.remove('hidden');
+                popolaSelettoreTargetRapido(appData.currentDay.weight);
+            } else {
+                block.classList.add('hidden');
+            }
+        }
+
+        function salvaNuovoTargetRapido() {
+                const nuovoT = parseFloat(document.getElementById('selectNuovoTargetRapido').value);
+                if(nuovoT) {
+                    const pesoRiferimento = appData.currentDay.weight || appData.user.weight;
+                    
+                    if (!appData.user.pesoInizialeStorico) {
+                        appData.user.pesoInizialeStorico = appData.user.weight;
+                    }
+
+                    appData.user.weight = pesoRiferimento; 
+                    appData.user.target = nuovoT;
+                    appData.user.isMantenimento = false; 
+                    
+                    alert(`🎯 Ottimo lavoro! Nuovo obiettivo impostato a ${nuovoT} kg. Inizia una nuova fase!`);
+                    
+                    ricalcolaGrammatureInTempoReale();
+                    salvaSuStorage();
+                    mostraOggi();
+                    gestisciVisibilitaPannelloTargetRapido();
+                    
+                    init(); 
+                }
+            }
+
+        function modificaPesoInizialeLibero() {
+            let attualeIniziale = appData.user.weight;
+            let nuovoIniziale = prompt("Modifica il peso iniziale di riferimento per le statistiche:", attualeIniziale);
+            if(nuovoIniziale !== null) {
+                let val = parseFloat(nuovoIniziale);
+                if(!isNaN(val) && val > 35) {
+                    appData.user.weight = val;
+                    salvaSuStorage();
+                    aggiornaCalendarioEStats();
+                    mostraOggi();
+                } else {
+                    alert("Valore non valido.");
+                }
+            }
+        }
+
+        function mostraSetup() {
+            document.getElementById('setupView').classList.remove('hidden');
+            document.getElementById('todayView').classList.add('hidden');
+            document.getElementById('calendarView').classList.add('hidden');
+            document.getElementById('appNav').classList.add('hidden');
+        }
+
+        function mostraSchermataPrincipale() {
+            document.getElementById('setupView').classList.add('hidden');
+            document.getElementById('appNav').classList.remove('hidden');
+            cambiaTab('today');
+        }
+
+        function salvaSetup() {
+            let nome = document.getElementById('setupName').value.trim();
+            if(!nome) { alert("Inserisci un nome per il profilo."); return; }
+            let pesoInserito = parseFloat(document.getElementById('setupWeight').value) || 85;
+            
+            globalStore.profiles[nome] = {
+                user: {
+                    name: nome,
+                    gender: document.getElementById('setupGender').value,
+                    age: parseInt(document.getElementById('setupAge').value) || 40,
+                    height: parseInt(document.getElementById('setupHeight').value) || 175,
+                    weight: pesoInserito,
+                    target: parseFloat(document.getElementById('setupTarget').value) || (pesoInserito - 10),
+                    activity: document.getElementById('setupActivity').value,
+                    isMantenimento: false,
+                    timestamp: new Date().getTime()
+                },
+                history: [],
+                temporaryFutureDays: {},
+                currentDay: { lunch: null, dinner: null, breakfast: null, breakfastImpatto: "medio", weight: pesoInserito, isNewWeight: true, compensazioneCarbo: 0, lastWeightDate: new Date().getTime(), isSgarro: false }
+            };
+
+            globalStore.currentProfileName = nome;
+            pesoModificatoOggi = true; 
+            caricaProfiloAttivo();
+        }
+
+        function compilaMenuDelGiorno() {
+            if(!appData.currentDay) {
+                appData.currentDay = { weight: appData.user.weight, compensazioneCarbo: 0, lastWeightDate: new Date().getTime(), isSgarro: false };
+            }
+            
+            let targetDayObj = appData.currentDay;
+            
+            if(indiceStoricoDashboard < 0) {
+                const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                
+                let salvatoInArchivio = appData.history.find(g => g.data === dataStringaFutura);
+                if (salvatoInArchivio && salvatoInArchivio.dettagli) {
+                    appData.temporaryFutureDays[dataStringaFutura] = {
+                        weight: salvatoInArchivio.peso || ottieniUltimoPesoDisponibile(),
+                        isSgarro: salvatoInArchivio.isSgarro || false,
+                        isNewWeight: salvatoInArchivio.peso !== null,
+                        breakfast: salvatoInArchivio.dettagli.breakfast,
+                        breakfastImpatto: salvatoInArchivio.dettagli.breakfastImpatto || "medio",
+                        lunch: JSON.parse(JSON.stringify(salvatoInArchivio.dettagli.lunch)),
+                        dinner: JSON.parse(JSON.stringify(salvatoInArchivio.dettagli.dinner))
+                    };
+                    return;
+                }
+
+                if(!appData.temporaryFutureDays[dataStringaFutura]) {
+                    appData.temporaryFutureDays[dataStringaFutura] = {
+                        weight: ottieniUltimoPesoDisponibile(),
+                        isSgarro: false,
+                        isNewWeight: false
+                    };
+                }
+                targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+            }
+
+            const brRandom = macroDatabase.breakfast[Math.floor(Math.random() * macroDatabase.breakfast.length)];
+            const cb = macroDatabase.carboPranzo[Math.floor(Math.random() * macroDatabase.carboPranzo.length)];
+            const prP = macroDatabase.protPranzo[Math.floor(Math.random() * macroDatabase.protPranzo.length)];
+            const prC = macroDatabase.protCena[Math.floor(Math.random() * macroDatabase.protCena.length)];
+
+            targetDayObj.breakfast = [...brRandom.elenco];
+            targetDayObj.breakfastImpatto = brRandom.impatto || "medio";
+            
+            targetDayObj.lunch = {
+                cCat: cb.cat, cQtaBase: cb.qta, cQta: cb.qta, cTipo: cb.tipo,
+                pCat: prP.cat, pQtaBase: prP.qta, pQta: prP.qta,
+                v: macroDatabase.verdure[Math.floor(Math.random() * macroDatabase.verdure.length)]
+            };
+            targetDayObj.dinner = {
+                pCat: prC.cat, pQtaBase: prC.qta, pQta: prC.qta, uM: prC.uM || "g",
+                paneBase: 60, pane: 60,
+                v: macroDatabase.verdure[Math.floor(Math.random() * macroDatabase.verdure.length)]
+            };
+
+            ricalcolaGrammatureInTempoReale();
+        }
+
+        function ottieniUltimoPesoDisponibile() {
+            if (appData.currentDay && appData.currentDay.weight) return appData.currentDay.weight;
+            return appData.user.weight;
+        }
+
+        function ricalcolaGrammatureInTempoReale() {
+            if(!appData || !appData.user) return;
+
+            let targetDayObj = appData.currentDay;
+            if(indiceStoricoDashboard < 0) {
+                const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                if(appData.temporaryFutureDays[dataStringaFutura]) targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+            }
+
+            if(!targetDayObj || !targetDayObj.lunch || !targetDayObj.dinner) return;
+
+            const pesoCalcolo = targetDayObj.weight || appData.user.weight;
+            const altezzaCalcolo = parseFloat(appData.user.height) || 175;
+            const etaCalcolo = parseInt(appData.user.age) || 40;
+            const sessoCalcolo = appData.user.gender || "M";
+
+            let bmr = 0;
+            if (sessoCalcolo === "M") {
+                bmr = 88.362 + (13.397 * pesoCalcolo) + (4.799 * altezzaCalcolo) - (5.677 * etaCalcolo);
+            } else {
+                bmr = 447.593 + (9.247 * pesoCalcolo) + (3.098 * altezzaCalcolo) - (4.330 * etaCalcolo);
+            }
+
+            // [FIX 2] Fallback robusto per il moltiplicatore di attività
+            let liveAttivita = appData.user.activity || "moderato";
+            let moltiplicatore = 1.375;
+            if (liveAttivita === "sedentario") moltiplicatore = 1.2;
+            else if (liveAttivita === "moderato") moltiplicatore = 1.375;
+            else if (liveAttivita === "attivo") moltiplicatore = 1.55;
+            
+            let tdee = bmr * moltiplicatore;
+
+            const tdeeRiferimentoStandard = (sessoCalcolo === 'M') ? 2200 : 1800;
+            let fattoreMetabolico = tdee / tdeeRiferimentoStandard;
+
+            let modColazione = 1.0;
+            let modPranzo = 1.0;
+            let infoBadge = "Bilanciato standard";
+
+            if (targetDayObj.breakfastImpatto === "alto") {
+                modColazione = 0.90; 
+                infoBadge = "📉 Colazione ricca: Pranzo e Cena bilanciati di conseguenza";
+            } else if (targetDayObj.breakfastImpatto === "basso") {
+                modColazione = 1.05; 
+                infoBadge = "📈 Colazione leggera: leggero bonus carboidrati";
+            }
+
+            if(targetDayObj.lunch.cTipo === "alto") {
+                modPranzo = 0.90;
+            } else if (targetDayObj.lunch.cTipo === "basso") {
+                modPranzo = 1.10;
+            }
+
+            let coeffProfilo = 1.0 * fattoreMetabolico;
+            let kgMancanti = targetDayObj.weight - appData.user.target;
+            
+            if(appData.user.isMantenimento) {
+                coeffProfilo *= 1.10; 
+                infoBadge = "⚖️ AI Mantenimento Attivo: Porzioni stabilizzate sul peso attuale";
+            } else {
+                if (kgMancanti > 8) coeffProfilo *= 0.92; 
+            }
+
+            let l = targetDayObj.lunch;
+            // [FIX 1] Isolamento dei dati base per evitare corruzioni nei calcoli (cQtaBase)
+            if (l.cQtaBase > 0) {
+                if (l.cCat.includes("Pasta") || l.cCat.includes("Riso") || l.cCat.includes("farro") || l.cCat.includes("orzo")) {
+                    let baseCarboDinamica = (sessoCalcolo === "M") ? 75 : 65;
+                    if (etaCalcolo <= 19 && sessoCalcolo === "M") baseCarboDinamica = 95; 
+                    l.cQta = Math.round((baseCarboDinamica * coeffProfilo * modColazione) / 5) * 5;
+                    if(sessoCalcolo === "M" && pesoCalcolo > 85 && l.cQta < 80 && liveAttivita !== "sedentario") l.cQta = 80;
+                } else if (l.cCat.includes("Patate")) {
+                    let baseCarboDinamica = (sessoCalcolo === "M") ? 250 : 200;
+                    l.cQta = Math.round((baseCarboDinamica * coeffProfilo * modColazione) / 5) * 5;
+                } else if (l.cCat.includes("Legumi")) {
+                    let baseCarboDinamica = (sessoCalcolo === "M") ? 90 : 75;
+                    l.cQta = Math.round((baseCarboDinamica * coeffProfilo * modColazione) / 5) * 5;
+                } else {
+                    l.cQta = Math.round((l.cQtaBase * coeffProfilo * modColazione) / 5) * 5;
+                }
+            } else {
+                l.cQta = 0;
+            }
+
+            let targetProteinePastoG = (sessoCalcolo === 'M') ? 30 : 22; 
+            if (pesoCalcolo > 80 && sessoCalcolo === 'M') targetProteinePastoG = 34; 
+            if (etaCalcolo <= 19) targetProteinePastoG += 3; 
+
+            // [FIX 3] Fallback logico per calcolo proteine non previste
+            if (l.pCat.includes("Bresaola") || l.pCat.includes("fesa")) {
+                l.pQta = Math.round((targetProteinePastoG / 0.31) / 5) * 5;
+            } else if (l.pCat.includes("Pollo") || l.pCat.includes("tacchino")) {
+                l.pQta = Math.round((targetProteinePastoG / 0.22) / 5) * 5;
+            } else if (l.pCat.includes("Tonno") || l.pCat.includes("sgombro")) {
+                l.pQta = Math.round((targetProteinePastoG / 0.24) / 5) * 5;
+            } else {
+                let fallbackPBase = l.pQtaBase || ((sessoCalcolo === 'M') ? 140 : 110);
+                l.pQta = Math.round((fallbackPBase * fattoreMetabolico) / 5) * 5;
+            }
+
+            let d = targetDayObj.dinner;
+            let targetProteineCenaG = (sessoCalcolo === 'M') ? 32 : 24;
+            if (pesoCalcolo > 80 && sessoCalcolo === 'M') targetProteineCenaG = 38;
+
+            if (d.pCat.includes("Merluzzo") || d.pCat.includes("orata")) {
+                d.pQta = Math.round((targetProteineCenaG / 0.18) / 5) * 5;
+                d.uM = "g";
+            } else if (d.pCat.includes("Salmone")) {
+                d.pQta = Math.round((targetProteineCenaG / 0.20) / 5) * 5;
+                d.uM = "g";
+            } else if (d.uM === "pz" || d.pCat.includes("Uova")) {
+                d.pQta = (pesoCalcolo > 80 && sessoCalcolo === 'M') ? 3 : 2;
+                d.uM = "pz";
+            } else {
+                let fallbackDBase = d.pQtaBase || ((sessoCalcolo === 'M') ? 140 : 110);
+                d.pQta = Math.round((fallbackDBase * fattoreMetabolico) / 5) * 5;
+                d.uM = "g";
+            }
+
+            let paneBaseProfilo = (sessoCalcolo === 'M') ? 70 : 50;
+            d.paneBase = paneBaseProfilo;
+            d.pane = Math.round((paneBaseProfilo * coeffProfilo * modColazione * modPranzo) / 5) * 5;
+            
+            if (sessoCalcolo === "M" && pesoCalcolo > 85 && d.pane < 60) d.pane = 60; 
+            
+            let maxPaneConsentito = (sessoCalcolo === 'M') ? 140 : 90;
+            if (d.pane > maxPaneConsentito) d.pane = maxPaneConsentito;
+
+            const badgeAI = document.getElementById('badgeAI');
+            if (badgeAI) badgeAI.innerText = "🤖 AI Real-Time: " + infoBadge;
+        }
+        
+        function ottieniDataStringaRelativa(offsetGiorni) {
+            let d = new Date();
+            d.setDate(d.getDate() - offsetGiorni);
+            return d.toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'});
+        }
+
+        function rigeneraPasto(tipo) {
+            let targetDayObj = appData.currentDay;
+            if(indiceStoricoDashboard < 0) {
+                const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                if(appData.temporaryFutureDays[dataStringaFutura]) targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+            }
+
+            if(tipo === 'breakfast') {
+                const b = macroDatabase.breakfast[Math.floor(Math.random() * macroDatabase.breakfast.length)];
+                targetDayObj.breakfast = [...b.elenco];
+                targetDayObj.breakfastImpatto = b.impatto || "medio";
+            } else if(tipo === 'lunch') {
+                const cb = macroDatabase.carboPranzo[Math.floor(Math.random() * macroDatabase.carboPranzo.length)];
+                const prP = macroDatabase.protPranzo[Math.floor(Math.random() * macroDatabase.protPranzo.length)];
+                // [FIX 5] Isolamento oggetti per evitare modifiche by-reference
+                targetDayObj.lunch = {
+                    cCat: cb.cat, cQtaBase: cb.qta, cQta: cb.qta, cTipo: cb.tipo,
+                    pCat: prP.cat, pQtaBase: prP.qta, pQta: prP.qta,
+                    v: macroDatabase.verdure[Math.floor(Math.random() * macroDatabase.verdure.length)]
+                };
+            } else if(tipo === 'dinner') {
+                const prC = macroDatabase.protCena[Math.floor(Math.random() * macroDatabase.protCena.length)];
+                targetDayObj.dinner = {
+                    pCat: prC.cat, pQtaBase: prC.qta, pQta: prC.qta, uM: prC.uM || "g",
+                    paneBase: 60, pane: 60,
+                    v: macroDatabase.verdure[Math.floor(Math.random() * macroDatabase.verdure.length)]
+                };
+            }
+            
+            ricalcolaGrammatureInTempoReale();
+            salvaSuStorage();
+            mostraOggi();
+        }
+
+        function toggleSgarroStato() {
+            let targetDayObj = appData.currentDay;
+            if(indiceStoricoDashboard < 0) {
+                const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                if(appData.temporaryFutureDays[dataStringaFutura]) targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+            }
+
+            targetDayObj.isSgarro = !targetDayObj.isSgarro;
+            gestisciVisibilitaSgarroElementi(targetDayObj.isSgarro);
+            salvaSuStorage();
+        }
+
+        function gestisciVisibilitaSgarroElementi(isSgarroActived) {
+            if(isSgarroActived) {
+                document.getElementById('blockNormalDiet').classList.add('hidden');
+                document.getElementById('blockSgarro').classList.remove('hidden');
+                document.getElementById('btnToggleSgarro').innerText = "Ripristina Dieta Normale";
+            } else {
+                document.getElementById('blockNormalDiet').classList.remove('hidden');
+                document.getElementById('blockSgarro').classList.add('hidden');
+                document.getElementById('btnToggleSgarro').innerText = "Imposta Oggi come Sgarro";
+            }
+        }
+
+        function registraPesoOggi() {
+            const val = parseFloat(document.getElementById('inputPesoOggi').value);
+            if(val && val > 35 && val < 250) {
+                
+                let targetDayObj = appData.currentDay;
+                if(indiceStoricoDashboard < 0) {
+                    const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                    if(appData.temporaryFutureDays[dataStringaFutura]) targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+                }
+
+                targetDayObj.weight = val; 
+                targetDayObj.isNewWeight = true; 
+                
+                const dataCorrenteVisualizzata = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                let recordGiorno = appData.history.find(g => g.data === dataCorrenteVisualizzata);
+                if(recordGiorno) {
+                    recordGiorno.peso = val;
+                }
+
+                if(indiceStoricoDashboard === 0) {
+                    targetDayObj.lastWeightDate = new Date().getTime();
+                    targetDayObj.historyCountOnLastWeight = appData.history ? appData.history.length : 0;
+                    pesoModificatoOggi = true;
+                }
+
+                if(!appData.user.isMantenimento && val <= appData.user.target) {
+                    setTimeout(() => {
+                        if(confirm(`🎉 COMPLIMENTI! Hai raggiunto il tuo target di ${appData.user.target} kg!\n\nVuoi attivare da oggi la modalità di MANTENIMENTO CALORICO? (Clicca ANNULLA se preferisci impostare un target più basso)`)) {
+                            appData.user.isMantenimento = true;
+                            appData.user.weight = val; 
+                        } else {
+                            appData.user.isMantenimento = false;
+                            let nuovoT = prompt("Inserisci il tuo nuovo target in kg:", Math.round((val - 4) * 10) / 10);
+                            if(nuovoT && parseFloat(nuovoT) > 35) {
+                                appData.user.weight = val; 
+                                appData.user.target = parseFloat(nuovoT);
+                                alert(`Nuovo obiettivo registrato: ${appData.user.target} kg. Peso iniziale riallineato.`);
+                            }
+                        }
+                        ricalcolaGrammatureInTempoReale();
+                        salvaSuStorage(); 
+                        mostraOggi();
+                        gestisciVisibilitaPannelloTargetRapido();
+                        aggiornaCalendarioEStats();
+                    }, 200);
+                }
+                
+                ricalcolaGrammatureInTempoReale();
+                salvaSuStorage(); 
+                controllaAlertPeso();
+                mostraOggi();
+                aggiornaCalendarioEStats();
+                gestisciVisibilitaPannelloTargetRapido();
+                
+                document.getElementById('inputPesoOggi').value = '';
+                alert("Peso aggiornato correttamente a " + val + " kg!");
+            } else { alert("Inserisci un peso valido."); }
+        }
+
+        function controllaAlertPeso() {
+            if(!appData || !appData.history) return;
+            if(!appData.currentDay) return;
+            if(appData.currentDay.historyCountOnLastWeight === undefined) appData.currentDay.historyCountOnLastWeight = 0;
+            
+            let oggiOltre = new Date(); oggiOltre.setHours(0,0,0,0);
+            let giorniPassatiSalvati = appData.history.filter(g => {
+                let parts = g.data.split('/');
+                let d = new Date(parts[2], parts[1]-1, parts[0]);
+                return d <= oggiOltre;
+            }).length;
+
+            let giorniSalvatiDallUltimoPeso = giorniPassatiSalvati - appData.currentDay.historyCountOnLastWeight;
+            if(giorniSalvatiDallUltimoPeso >= 7) {
+                document.getElementById('weightAlert').classList.remove('hidden');
+            } else { document.getElementById('weightAlert').classList.add('hidden'); }
+        }
+
+        function navigaGiornoDashboard(direzione) {
+            let nuovoIndice = indiceStoricoDashboard + direzione;
+            if (nuovoIndice > appData.history.length) nuovoIndice = appData.history.length;
+
+            indiceStoricoDashboard = nuovoIndice;
+            
+            if(indiceStoricoDashboard < 0) {
+                const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                if(!appData.temporaryFutureDays[dataStringaFutura] || !appData.temporaryFutureDays[dataStringaFutura].lunch) {
+                    compilaMenuDelGiorno();
+                }
+            }
+            
+            mostraOggi();
+            gestisciVisibilitaPannelloTargetRapido();
+        }
+
+        function ritornaAOggiDashboard() {
+            indiceStoricoDashboard = 0;
+            const inputCerca = document.getElementById('inputCercaDataDashboard');
+            if(inputCerca) inputCerca.value = '';
+            mostraOggi();
+            gestisciVisibilitaPannelloTargetRapido();
+        }
+
+        function saltaADataDashboard(valore) {
+            let trimVal = valore.trim();
+            let parts = trimVal.split('/');
+            if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                let giorno = parseInt(parts[0], 10);
+                let mese = parseInt(parts[1], 10) - 1;
+                let anno = parseInt(parts[2], 10);
+                let dataTarget = new Date(anno, mese, giorno);
+                
+                if (!isNaN(dataTarget.getTime())) {
+                    let oggi = new Date();
+                    oggi.setHours(0,0,0,0);
+                    dataTarget.setHours(0,0,0,0);
+                    
+                    let diffTempo = oggi.getTime() - dataTarget.getTime();
+                    let diffGiorni = Math.round(diffTempo / (1000 * 60 * 60 * 24));
+                    
+                    indiceStoricoDashboard = diffGiorni;
+                    
+                    if(indiceStoricoDashboard < 0) {
+                        const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                        if(!appData.temporaryFutureDays[dataStringaFutura] || !appData.temporaryFutureDays[dataStringaFutura].lunch) {
+                            compilaMenuDelGiorno();
+                        }
+                    }
+                    
+                    mostraOggi();
+                    gestisciVisibilitaPannelloTargetRapido();
+                }
+            }
+        }
+
+        function verificaSeGiornoArchiviato(dataCercata) {
+            if(!appData || !appData.history) return false;
+            return appData.history.some(g => g.data === dataCercata);
+        }
+
+        function aggiornaBadgeStatoSalvataggio(dataStringa) {
+            const badge = document.getElementById('archiveStatusBadge');
+            if(!badge) return;
+            
+            let d = new Date(); d.setHours(0,0,0,0);
+            let parts = dataStringa.split('/');
+            let dataVis = new Date(parts[2], parts[1]-1, parts[0]);
+
+            if(verificaSeGiornoArchiviato(dataStringa)) {
+                if (dataVis > d) {
+                    badge.innerText = `📅 Giornata pianificata bloccata in archivio (${dataStringa})`;
+                } else {
+                    badge.innerText = `✅ Giornata salvata correttamente in Storico & Stats (${dataStringa})`;
+                }
+                badge.className = "archive-status-badge status-saved";
+            } else {
+                if (dataVis > d) {
+                    badge.innerText = `⚠️ Menu di previsione libera non ancora bloccato (${dataStringa})`;
+                } else {
+                    badge.innerText = `⚠️ Giornata non ancora salvata nello storico (${dataStringa})`;
+                }
+                badge.className = "archive-status-badge status-unsaved";
+            }
+        }
+
+        function mostraOggi() {
+            if(!appData || !appData.user) return;
+
+            const btnPrev = document.getElementById('btnMainPrev');
+            const btnNext = document.getElementById('btnMainNext');
+            const lblStatus = document.getElementById('lblMainDateStatus');
+            const titleCard = document.getElementById('titleDietCard');
+            
+            const btnRegenB = document.getElementById('btnRegenBreakfast');
+            const btnRegenL = document.getElementById('btnRegenLunch');
+            const btnRegenD = document.getElementById('btnRegenDinner');
+            const btnArchN = document.getElementById('btnArchiviaNormale');
+            const btnArchS = document.getElementById('btnArchiviaSgarro');
+            const btnTogS = document.getElementById('btnToggleSgarro');
+            const blockWeight = document.getElementById('blockUpdateWeight');
+            const badgeAI = document.getElementById('badgeAI');
+
+            btnPrev.disabled = (indiceStoricoDashboard === appData.history.length);
+            btnNext.disabled = false; 
+
+            const dataCorrenteVisualizzata = ottieniDataStringaRelativa(indiceStoricoDashboard);
+            aggiornaBadgeStatoSalvataggio(dataCorrenteVisualizzata);
+
+            if(indiceStoricoDashboard < 0) {
+                if(blockWeight) blockWeight.classList.add('hidden');
+            } else {
+                if(blockWeight) blockWeight.classList.remove('hidden');
+            }
+
+            if (indiceStoricoDashboard <= 0) {
+                let targetDayObj = appData.currentDay;
+                if(indiceStoricoDashboard === 0) {
+                    lblStatus.innerText = "Oggi";
+                    titleCard.innerText = "Piano Alimentare Odierno";
+                } else {
+                    lblStatus.innerText = dataCorrenteVisualizzata;
+                    titleCard.innerText = `Pianificazione per il ${dataCorrenteVisualizzata}`;
+                    const dataStringaFutura = ottieniDataStringaRelativa(indiceStoricoDashboard);
+                    if(appData.temporaryFutureDays[dataStringaFutura]) targetDayObj = appData.temporaryFutureDays[dataStringaFutura];
+                }
+                
+                if(btnRegenB) btnRegenB.classList.remove('hidden');
+                if(btnRegenL) btnRegenL.classList.remove('hidden');
+                if(btnRegenD) btnRegenD.classList.remove('hidden');
+                if(btnArchN) btnArchN.classList.remove('hidden');
+                if(btnArchS) btnArchS.classList.remove('hidden');
+                if(btnTogS) btnTogS.classList.remove('hidden');
+                if(badgeAI) badgeAI.classList.remove('hidden');
+
+                let litriAcqua = (targetDayObj.weight * 0.035).toFixed(1);
+                let bicchieri = Math.ceil((litriAcqua * 1000) / 200);
+                document.getElementById('lblWaterTarget').innerText = `${litriAcqua} Litri al giorno`;
+                document.getElementById('lblWaterGlasses').innerText = `💡 Circa ${bicchieri} bicchieri d'acqua.`;
+
+                let stringaStatoPeso = "";
+                if(appData.user.isMantenimento) {
+                    stringaStatoPeso = `Mantenimento Attivo ⚖️ [${appData.user.gender}] | Peso Corrente: ${targetDayObj.weight} kg`;
+                } else {
+                    let residuo = (targetDayObj.weight - appData.user.target).toFixed(1);
+                    stringaStatoPeso = `Peso: ${targetDayObj.weight} kg [${appData.user.gender}] | Target: ${appData.user.target} kg (Mancano: ${residuo} kg)`;
+                }
+                
+                if (indiceStoricoDashboard < 0 && !targetDayObj.isNewWeight) {
+                    stringaStatoPeso += " (In attesa di peso reale)";
+                }
+                document.getElementById('txtWeightStatus').innerText = stringaStatoPeso;
+
+                let bkHtml = '';
+                if(targetDayObj.breakfast) {
+                    targetDayObj.breakfast.forEach(item => { bkHtml += `<div class="meal-item"><span>${item}</span></div>`; });
+                }
+                document.getElementById('boxBreakfast').innerHTML = bkHtml || 'Nessun dato';
+
+                const l = targetDayObj.lunch;
+                if(l) {
+                    document.getElementById('boxLunch').innerHTML = `
+                        <div class="meal-item"><span>${l.cCat}</span><span class="qty">${l.cQta === 0 ? 'Libera (0g)' : l.cQta + 'g'}</span></div>
+                        <div class="meal-item"><span>${l.pCat}</span><span class="qty">${l.pQta}g</span></div>
+                        <div class="meal-item"><span>${l.v}</span><span class="qty">A scelta</span></div>
+                    `;
+                }
+
+                const d = targetDayObj.dinner;
+                if(d) {
+                    document.getElementById('boxDinner').innerHTML = `
+                        <div class="meal-item"><span>${d.pCat}</span><span class="qty">${d.pQta}${d.uM || 'g'}</span></div>
+                        <div class="meal-item"><span>Pane Integrale</span><span class="qty">${d.pane}g</span></div>
+                        <div class="meal-item"><span>${d.v}</span><span class="qty">A scelta</span></div>
+                    `;
+                }
+                
+                gestisciVisibilitaSgarroElementi(targetDayObj.isSgarro);
+                ricalcolaGrammatureInTempoReale();
+
+            } else {
+                let recordPassato = appData.history[indiceStoricoDashboard - 1];
+                lblStatus.innerText = recordPassato.data;
+                titleCard.innerText = `Menu Registrato il ${recordPassato.data}`;
+                
+                if(btnRegenB) btnRegenB.classList.add('hidden');
+                if(btnRegenL) btnRegenL.classList.add('hidden');
+                if(btnRegenD) btnRegenD.classList.add('hidden');
+                if(btnArchN) btnArchN.classList.add('hidden');
+                if(btnArchS) btnArchS.classList.add('hidden');
+                if(btnTogS) btnTogS.classList.add('hidden');
+                if(blockWeight) blockWeight.classList.add('hidden');
+                if(badgeAI) badgeAI.classList.add('hidden');
+
+                let pesoVisualizzato = recordPassato.peso ? `${recordPassato.peso} kg` : "Non registrato (Pianificato)";
+                document.getElementById('txtWeightStatus').innerText = `Peso: ${pesoVisualizzato}`;
+
+                if(recordPassato.isSgarro) {
+                    document.getElementById('blockNormalDiet').classList.add('hidden');
+                    document.getElementById('blockSgarro').classList.remove('hidden');
+                } else {
+                    document.getElementById('blockNormalDiet').classList.remove('hidden');
+                    document.getElementById('blockSgarro').classList.add('hidden');
+
+                    let bkHtml = '';
+                    if(recordPassato.dettagli && recordPassato.dettagli.breakfast) {
+                        recordPassato.dettagli.breakfast.forEach(item => { bkHtml += `<div class="meal-item"><span>${item}</span></div>`; });
+                    }
+                    document.getElementById('boxBreakfast').innerHTML = bkHtml || 'Nessun dato';
+
+                    const l = recordPassato.dettagli ? recordPassato.dettagli.lunch : null;
+                    if(l) {
+                        document.getElementById('boxLunch').innerHTML = `
+                            <div class="meal-item"><span>${l.cCat || 'Carboidrati'}</span><span class="qty">${l.cQta === 0 ? 'Libera' : l.cQta + 'g'}</span></div>
+                            <div class="meal-item"><span>${l.pCat || 'Proteine'}</span><span class="qty">${l.pQta}g</span></div>
+                            <div class="meal-item"><span>${l.v || 'Verdure'}</span><span class="qty">A scelta</span></div>
+                        `;
+                    }
+
+                    const d = recordPassato.dettagli ? recordPassato.dettagli.dinner : null;
+                    if(d) {
+                        document.getElementById('boxDinner').innerHTML = `
+                            <div class="meal-item"><span>${d.pCat || 'Proteine'}</span><span class="qty">${d.pQta}${d.uM || 'g'}</span></div>
+                            <div class="meal-item"><span>Pane Integrale</span><span class="qty">${d.pane}g</span></div>
+                            <div class="meal-item"><span>${d.v || 'Verdure'}</span><span class="qty">A scelta</span></div>
+                        `;
+                    }
+                }
+            }
+        }
+
+        function archiviaGiornata(giornoDiSgarro) {
+            const dataDaSalvare = ottieniDataStringaRelativa(indiceStoricoDashboard);
+            
+            if(appData.history.some(g => g.data === dataDaSalvare)) {
+                if(!confirm(`La giornata del ${dataDaSalvare} è già presente in archivio. Sostituirla con il menu attuale?`)) return;
+                appData.history = appData.history.filter(g => g.data !== dataDaSalvare);
+            }
+
+            let sourceDayObj = appData.currentDay;
+            if(indiceStoricoDashboard < 0) {
+                if(appData.temporaryFutureDays[dataDaSalvare]) sourceDayObj = appData.temporaryFutureDays[dataDaSalvare];
+            }
+
+            let sintesiPasto = "Giorno Libero 🎉";
+            if (!giornoDiSgarro && sourceDayObj.lunch && sourceDayObj.dinner) {
+                let carboInfo = sourceDayObj.lunch.cCat ? sourceDayObj.lunch.cCat.split(' ')[0] : "Carboidrati";
+                let proteInfo = sourceDayObj.dinner.pCat ? sourceDayObj.dinner.pCat.split(' ')[0] : "Proteine";
+                sintesiPasto = `${carboInfo} + ${proteInfo}`;
+            }
+
+            // [FIX 4] Non archiviare i dati di un pasto normale se è giorno di sgarro
+            let dettagliMenuSalvati = null;
+            if (!giornoDiSgarro) {
+                dettagliMenuSalvati = {
+                    breakfast: sourceDayObj.breakfast ? [...sourceDayObj.breakfast] : [],
+                    breakfastImpatto: sourceDayObj.breakfastImpatto || "medio",
+                    lunch: sourceDayObj.lunch ? JSON.parse(JSON.stringify(sourceDayObj.lunch)) : null,
+                    dinner: sourceDayObj.dinner ? JSON.parse(JSON.stringify(sourceDayObj.dinner)) : null
+                };
+            }
+
+            let pesoDaArchiviare = sourceDayObj.isNewWeight ? sourceDayObj.weight : null; 
+
+            appData.history.unshift({ 
+                id: new Date().getTime(), 
+                data: dataDaSalvare, 
+                peso: pesoDaArchiviare, 
+                sintesi: sintesiPasto, 
+                isSgarro: giornoDiSgarro,
+                dettagli: dettagliMenuSalvati
+            });
+
+            appData.history.sort((a,b) => {
+                let partsA = a.data.split('/'); let partsB = b.data.split('/');
+                return new Date(partsB[2], partsB[1]-1, partsB[0]) - new Date(partsA[2], partsA[1]-1, partsA[0]);
+            });
+
+            if(indiceStoricoDashboard === 0) {
+                let vecchioPesoSincronizzato = appData.currentDay.weight;
+                let vecchiGiorniAlert = appData.currentDay.historyCountOnLastWeight || 0;
+                pesoModificatoOggi = false;
+
+                appData.currentDay = {
+                    lunch: null, dinner: null, breakfast: null, breakfastImpatto: "medio",
+                    weight: vecchioPesoSincronizzato, 
+                    isNewWeight: false,
+                    historyCountOnLastWeight: vecchiGiorniAlert,
+                    isSgarro: false
+                };
+                compilaMenuDelGiorno();
+            }
+
+            salvaSuStorage();
+            paginaCorrenteStorico = 0; 
+            
+            aggiornaBadgeStatoSalvataggio(dataDaSalvare);
+            aggiornaCalendarioEStats(); 
+            alert(`Giornata del ${dataDaSalvare} bloccata con successo!`);
+            
+            controllaAlertPeso();
+            cambiaTab('today');
+        }
+
+        function json_fine_parsing_future() {
+            if(!appData.temporaryFutureDays) appData.temporaryFutureDays = {};
+        }
+
+        function eliminaGiornoStorico(idGiorno, event) {
+            event.stopPropagation(); 
+            
+            let indice = appData.history.findIndex(g => String(g.id) === String(idGiorno) || (g.id === undefined && g.data === idGiorno));
+            if(indice === -1) return;
+
+            let giorno = appData.history[indice];
+            if(!confirm(`Vuoi davvero eliminare la giornata del ${giorno.data}?`)) return;
+
+            if(appData.temporaryFutureDays && appData.temporaryFutureDays[giorno.data]) {
+                delete appData.temporaryFutureDays[giorno.data];
+            }
+
+            appData.history.splice(indice, 1);
+            indiceStoricoDashboard = 0; 
+            
+            salvaSuStorage();
+            controllaAlertPeso();
+            aggiornaCalendarioEStats();
+            mostraOggi();
+        }
+
+        function filtraStoricoPerData(valore) {
+            queryFiltroStorico = valore.trim().toLowerCase();
+            paginaCorrenteStorico = 0; 
+            renderingVociStorico();
+        }
+
+        function cambiaPaginaStorico(direzione) {
+            paginaCorrenteStorico += direzione;
+            renderingVociStorico();
+        }
+
+        function renderingVociStorico() {
+            const contenitoreCalendario = document.getElementById('listCalendarLog');
+            const paginator = document.getElementById('paginationContainer');
+            if(!contenitoreCalendario) return;
+
+            const elementiFiltrati = appData.history.filter(giorno => {
+                return giorno.data.toLowerCase().includes(queryFiltroStorico) || 
+                       giorno.sintesi.toLowerCase().includes(queryFiltroStorico);
+            });
+
+            if(elementiFiltrati.length === 0) {
+                contenitoreCalendario.innerHTML = "<p style='text-align:center; color:var(--text-muted); font-size:0.9rem; padding: 20px 0;'>Nessun dato corrispondente trovato.</p>";
+                paginator.classList.add('hidden');
+                return;
+            }
+
+            const totaleElementi = elementiFiltrati.length;
+            const maxPagine = Math.ceil(totaleElementi / elementiPerPagina);
+            
+            if(paginaCorrenteStorico >= maxPagine) paginaCorrenteStorico = maxPagine - 1;
+            if(paginaCorrenteStorico < 0) paginaCorrenteStorico = 0;
+
+            const inizio = paginaCorrenteStorico * elementiPerPagina;
+            const fine = inizio + elementiPerPagina;
+            const elementiPaginaCorrente = elementiFiltrati.slice(inizio, fine);
+
+            contenitoreCalendario.innerHTML = '';
+            elementiPaginaCorrente.forEach(giorno => {
+                let badgesgarro = giorno.isSgarro ? `<span style="background-color: #fee2e2; color: var(--danger); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 6px; font-weight: 600;">Sgarro</span>` : '';
+                
+                let stringaPeso = '';
+                if (giorno.peso !== null && giorno.peso !== undefined) {
+                    stringaPeso = `${giorno.peso} kg`;
+                } else {
+                    stringaPeso = `<span style="font-size:0.75rem; font-weight:normal; color:var(--accent);">📋 Pianificato</span>`;
+                }
+                
+                let idRiferimento = giorno.id ? giorno.id : giorno.data;
+
+                let htmlDettagli = `Giorno di sgarro libero. I vincoli dei macronutrienti sono stati sospesi.`;
+                if(!giorno.isSgarro && giorno.dettagli) {
+                    let dCol = giorno.dettagli.breakfast ? giorno.dettagli.breakfast.join(', ') : 'Standard';
+                    let dPra = giorno.dettagli.lunch ? `${giorno.dettagli.lunch.cCat} (${giorno.dettagli.lunch.cQta === 0 ? 'Libera' : giorno.dettagli.lunch.cQta + 'g'}) + ${giorno.dettagli.lunch.pCat} (${giorno.dettagli.lunch.pQta}g)` : '-';
+                    let dCen = giorno.dettagli.dinner ? `${giorno.dettagli.dinner.pCat} (${giorno.dettagli.dinner.pQta}${giorno.dettagli.dinner.uM || 'g'}) + Pane (${giorno.dettagli.dinner.pane}g)` : '-';
+                    
+                    htmlDettagli = `
+                        <div><strong>Colazione:</strong> ${dCol}</div>
+                        <div><strong>Pranzo:</strong> ${dPra} + ${giorno.dettagli.lunch.v}</div>
+                        <div><strong>Cena:</strong> ${dCen} + ${giorno.dettagli.dinner.v}</div>
+                    `;
+                }
+
+                contenitoreCalendario.innerHTML += `
+                    <details class="log-disclosure">
+                        <summary class="log-summary">
+                            <div>
+                                <span style="font-weight: 700; margin-right: 8px;">${giorno.data}</span>
+                                <span style="color: var(--text-dark); font-weight: 500;">${giorno.sintesi}</span>
+                                ${badgesgarro}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-weight: 700; color: var(--blue);">${stringaPeso}</div>
+                                <button class="btn-delete-log" onclick="eliminaGiornoStorico('${idRiferimento}', event)">Elimina 🗑️</button>
+                            </div>
+                        </summary>
+                        <div class="log-details-content">
+                            ${htmlDettagli}
+                        </div>
+                    </details>
+                `;
+            });
+
+            if(totaleElementi > elementiPerPagina) {
+                paginator.classList.remove('hidden');
+                document.getElementById('lblPageStatus').innerText = `Pagina ${paginaCorrenteStorico + 1} di ${maxPagine}`;
+                document.getElementById('btnPrevPage').disabled = (paginaCorrenteStorico === 0);
+                document.getElementById('btnNextPage').disabled = (paginaCorrenteStorico === maxPagine - 1);
+            } else {
+                paginator.classList.add('hidden');
+            }
+        }
+
+        function aggiornaCalendarioEStats() {
+            if(!appData || !appData.user) return;
+            
+            const pesoIniziale = appData.user.weight;
+            const pesoTarget = appData.user.target;
+            const ultimoPesoValido = appData.currentDay.weight;
+
+            document.getElementById('stIniziale').innerText = pesoIniziale + " kg";
+            document.getElementById('stTarget').innerText = pesoTarget + " kg";
+            document.getElementById('stAttuale').innerText = ultimoPesoValido + " kg";
+            
+            const boxTrend = document.getElementById('stTrend');
+            const boxStatoObiettivo = document.getElementById('stStatoObiettivo');
+            const boxFeedback = document.getElementById('txtTrendFeedback');
+
+            let storicoRealeConPeso = appData.history.filter(g => g.peso !== null && g.peso !== undefined);
+
+            if (appData.user.isMantenimento || ultimoPesoValido <= pesoTarget) {
+                boxStatoObiettivo.innerText = "🏆 Target OK";
+                boxStatoObiettivo.style.color = "var(--primary)";
+            } else {
+                let deltaTotaleIniziale = pesoIniziale - pesoTarget;
+                let deltaSvolto = pesoIniziale - ultimoPesoValido;
+                
+                if (deltaSvolto > 0) {
+                    boxStatoObiettivo.innerText = "📉 In Calo";
+                    boxStatoObiettivo.style.color = "var(--blue)";
+                } else if (deltaSvolto < 0) {
+                    boxStatoObiettivo.innerText = "⚠️ Aumento";
+                    boxStatoObiettivo.style.color = "var(--danger)";
+                } else {
+                    boxStatoObiettivo.innerText = "🏁 Punto di Partenza";
+                    boxStatoObiettivo.style.color = "var(--accent)";
+                }
+            }
+
+            if (storicoRealeConPeso.length >= 2) {
+                let ultimoPesoStorico = storicoRealeConPeso[0].weight || storicoRealeConPeso[0].peso;
+                let penultimoPesoStorico = storicoRealeConPeso[1] ? (storicoRealeConPeso[1].weight || storicoRealeConPeso[1].peso) : pesoIniziale;
+                
+                let riferimentoPrecedente = penultimoPesoStorico;
+                let differenzaTrend = ultimoPesoValido - riferimentoPrecedente;
+
+                if (differenzaTrend > 0.1) {
+                    boxTrend.innerText = "🔺 Aumento";
+                    boxTrend.style.color = "var(--danger)";
+                } else if (differenzaTrend < -0.1) {
+                    boxTrend.innerText = "⏬ In Calo";
+                    boxTrend.style.color = "var(--primary)";
+                } else {
+                    boxTrend.innerText = "🔃 Stabile";
+                    boxTrend.style.color = "var(--accent)";
+                }
+            } else {
+                boxTrend.innerText = "🔍 In Analisi";
+                boxTrend.style.color = "var(--text-muted)";
+            }
+
+            if(appData.user.isMantenimento) {
+                boxFeedback.innerText = "🎯 Regime di mantenimento attivo. Le icone monitorano la stabilità del tuo peso attuale rispetto alle pesate precedenti.";
+            } else {
+                let residuo = (ultimoPesoValido - pesoTarget).toFixed(1);
+                boxFeedback.innerText = `Mancano ancora ${residuo} kg al target attuale. Le icone mostrano la direzione del peso rispetto all'ultimo dato reale salvato.`;
+            }
+
+            renderingVociStorico();
+        }
+
+        function cambiaTab(tab) {
+            document.getElementById('todayView').classList.add('hidden');
+            document.getElementById('calendarView').classList.add('hidden');
+            document.getElementById('tabToday').classList.remove('active');
+            document.getElementById('tabCalendar').classList.remove('active');
+            
+            if(tab === 'today') {
+                document.getElementById('todayView').classList.remove('hidden');
+                document.getElementById('tabToday').classList.add('active');
+                mostraOggi();
+                gestisciVisibilitaPannelloTargetRapido();
+            } else if(tab === 'calendar') {
+                document.getElementById('calendarView').classList.remove('hidden');
+                document.getElementById('tabCalendar').classList.add('active');
+                const inputCerca = document.getElementById('inputCercaData');
+                if(inputCerca) inputCerca.value = '';
+                queryFiltroStorico = "";
+                aggiornaCalendarioEStats();
+            }
+        }
+
+        function salvaSuStorage() { 
+            localStorage.setItem('bioDietDashboardDB_v3', JSON.stringify(globalStore)); 
+        }
+
+        function esportaBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalStore, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `biodet_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.removeChild(downloadAnchor);
+        }
+
+        function importaBackup(event) {
+            const input = event.target;
+            const reader = new FileReader();
+            reader.onload = function(){
+                try {
+                    const parsed = JSON.parse(reader.result);
+                    if (parsed.profiles && parsed.currentProfileName !== undefined) {
+                        globalStore = parsed;
+                        salvaSuStorage();
+                        alert("Backup caricato con successo! La pagina verrà ricaricata.");
+                        location.reload();
+                    } else {
+                        alert("File JSON non valido.");
+                    }
+                } catch(e) {
+                    alert("Errore durante la lettura del file JSON.");
+                }
+            };
+            if(input.files[0]) reader.readAsText(input.files[0]);
+        }
+
+        function resetApp() { 
+            if(confirm(`Resettare il profilo corrente "${globalStore.currentProfileName}"?`)) { 
+                delete globalStore.profiles[globalStore.currentProfileName];
+                const rimasti = Object.keys(globalStore.profiles);
+                if(rimasti.length > 0) {
+                    globalStore.currentProfileName = rimasti[0];
+                    salvaSuStorage(); caricaProfiloAttivo();
+                } else {
+                    globalStore.currentProfileName = ""; salvaSuStorage(); location.reload();
+                }
+            } 
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
